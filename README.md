@@ -1,16 +1,16 @@
 # Tutorial - Deploy Stable Video Diffusion using Inferless
 
-Check out [this tutorial](https://tutorials.inferless.com/deploy-stable-video-diffusion-using-inferless) which will guides you through the process of deploying a Stable Video Diffusion model using Inferless.
+Check out [this tutorial](https://docs.inferless.com/how-to-guides/deploy-stable-video-diffusion-using-inferless) which will guides you through the process of deploying a Stable Video Diffusion model using Inferless.
 
 ## TL;DR - Deploy Stable Video Diffusion using Inferless:
 
 - Deployment of stable-video-diffusion-img2vid-xt model using [diffusers](https://github.com/huggingface/diffusers).
-- By using the diffusers, you can expect an average lowest latency of 16 sec. This setup has an average cold start time of 7 sec.
-- Dependencies defined in config.yaml.
-- GitHub/GitLab template creation with app.py and config.yaml.
-- Model class in app.py with initialize, infer, and finalize functions.
+- By using the diffusers, you can expect an average lowest latency of `34 sec`. This setup has an average cold start time of `7.02 sec`.
+- Dependencies defined in `inferless-runtime-config.yaml`.
+- GitHub/GitLab template creation with `app.py`, `inferless-runtime-config.yaml` and `inferless.yaml`.
+- Model class in `app.py` with `initialize`, `infer`, and `finalize` functions.
 - Custom runtime creation with necessary system and Python packages.
-- Model import via GitHub with input/output parameters in JSON.
+- Model import via GitHub with `input_schema.py` file.
 - Recommended GPU: NVIDIA A100 for optimal performance.
 - Custom runtime selection in advanced configuration.
 - Final review and deployment on the Inferless platform.
@@ -22,18 +22,18 @@ Check out [this tutorial](https://tutorials.inferless.com/deploy-stable-video-di
 - **Curl**. You would need Curl if you want to make API calls from the terminal itself.
 
 ---
-## Quick Tutorial on "How to Deploy" on Inferless
+## Quick Start
 Here is a quick start to help you get up and running with this template on Inferless.
-
-### Download the config and Create a runtime 
-Get started by downloading the config.yaml file and go to Inferless dashboard and create a custom runtime.
-
-Quickly add this as a Custom runtime.
 
 ### Fork the Repository
 Get started by forking the repository. You can do this by clicking on the fork button in the top right corner of the repository page.
 
 This will create a copy of the repository in your own GitHub account, allowing you to make changes and customize it according to your needs.
+
+### Create a Custom Runtime in Inferless
+To access the custom runtime window in Inferless, simply navigate to the sidebar and click on the **Create new Runtime** button. A pop-up will appear.
+
+Next, provide a suitable name for your custom runtime and proceed by uploading the **inferless-runtime-config.yaml** file given above. Finally, ensure you save your changes by clicking on the save button.
 
 
 ### Import the Model in Inferless
@@ -43,45 +43,7 @@ Select the PyTorch as framework and choose **Repo(custom code)** as your model s
 
 After the create model step, while setting the configuration for the model make sure to select the appropriate runtime.
 
-Enter all the required details to Import your model. Refer [this link](https://docs.inferless.com/integrations/github-custom-code) for more information on model import.
-
-The following is a sample Input and Output JSON for this model which you can use while importing this model on Inferless.
-
-### Input
-```json
-{
-    "inputs": [
-      {
-        "data": [
-          "https://images.cnbctv18.com/wp-content/uploads/2022/08/ashneer-grover-3-Meme-1-1019x573.jpg"
-        ],
-        "name": "image_url",
-        "shape": [
-          1
-        ],
-        "datatype": "BYTES"
-      }
-    ]
-}
-```
-
-### Output
-```json
-{
-    "outputs": [
-      {
-        "data": [
-          "data"
-        ],
-        "name": "generated_video",
-        "shape": [
-          1
-        ],
-        "datatype": "BYTES"
-      }
-    ]
-}
-```
+Enter all the required details to Import your model. Refer [this link](https://docs.inferless.com/integrations/git-custom-code/git--custom-code) for more information on model import.
 
 ---
 ## Curl Command
@@ -113,14 +75,17 @@ Open the `app.py` file. This contains the main code for inference. It has three 
 
 **Initialize** -  This function is executed during the cold start and is used to initialize the model. If you have any custom configurations or settings that need to be applied during the initialization, make sure to add them in this function.
 
-**Infer** - This function is where the inference happens. The argument to this function `inputs`, is a dictionary containing all the input parameters. The keys are the same as the name given in the inputs. Refer to [input](#input) for more.
+**Infer** - This function is where the inference happens. The argument to this function `inputs`, is a dictionary containing all the input parameters. The keys are the same as the name given in the inputs. Refer to [input](https://docs.inferless.com/model-import/input-output-schema) for more.
 
 ```python
-def infer(self, inputs):
-    prompt = inputs["prompt"]
+def infer(self,inputs):
+    image_url = inputs['image_url']
 ```
 
-**Finalize** - This function is used to perform any cleanup activity for example you can unload the model from the GPU by setting `self.pipe = None`.
-
+**Finalize** - This function is used to perform any cleanup activity for example you can unload the model from the GPU by setting to `None`.
+```python
+def finalize(self):
+    self.pipe = None
+```
 
 For more information refer to the [Inferless docs](https://docs.inferless.com/).
